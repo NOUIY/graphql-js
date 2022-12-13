@@ -1,17 +1,25 @@
-import type { ObjMap } from '../jsutils/ObjMap';
+import type { ObjMap } from '../jsutils/ObjMap.js';
 import type {
-  SelectionSetNode,
   FieldNode,
   FragmentDefinitionNode,
-} from '../language/ast';
-import type { GraphQLSchema } from '../type/schema';
-import type { GraphQLObjectType } from '../type/definition';
+  SelectionSetNode,
+} from '../language/ast.js';
+import type { GraphQLObjectType } from '../type/definition.js';
+import type { GraphQLSchema } from '../type/schema.js';
+export interface PatchFields {
+  label: string | undefined;
+  fields: Map<string, ReadonlyArray<FieldNode>>;
+}
+export interface FieldsAndPatches {
+  fields: Map<string, ReadonlyArray<FieldNode>>;
+  patches: Array<PatchFields>;
+}
 /**
- * Given a selectionSet, collect all of the fields and returns it at the end.
+ * Given a selectionSet, collects all of the fields and returns them.
  *
- * CollectFields requires the "runtime type" of an object. For a field which
+ * CollectFields requires the "runtime type" of an object. For a field that
  * returns an Interface or Union type, the "runtime type" will be the actual
- * Object type returned by that field.
+ * object type returned by that field.
  *
  * @internal
  */
@@ -23,14 +31,14 @@ export declare function collectFields(
   },
   runtimeType: GraphQLObjectType,
   selectionSet: SelectionSetNode,
-): Map<string, ReadonlyArray<FieldNode>>;
+): FieldsAndPatches;
 /**
  * Given an array of field nodes, collects all of the subfields of the passed
- * in fields, and returns it at the end.
+ * in fields, and returns them at the end.
  *
- * CollectFields requires the "return type" of an object. For a field which
+ * CollectSubFields requires the "return type" of an object. For a field that
  * returns an Interface or Union type, the "return type" will be the actual
- * Object type returned by that field.
+ * object type returned by that field.
  *
  * @internal
  */
@@ -42,4 +50,4 @@ export declare function collectSubfields(
   },
   returnType: GraphQLObjectType,
   fieldNodes: ReadonlyArray<FieldNode>,
-): Map<string, ReadonlyArray<FieldNode>>;
+): FieldsAndPatches;
