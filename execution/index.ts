@@ -7,10 +7,9 @@ export {
   defaultFieldResolver,
   defaultTypeResolver,
   subscribe,
-  experimentalSubscribeIncrementally,
 } from './execute.ts';
+export type { ExecutionArgs } from './execute.ts';
 export type {
-  ExecutionArgs,
   ExecutionResult,
   ExperimentalIncrementalExecutionResults,
   InitialIncrementalExecutionResult,
@@ -24,7 +23,7 @@ export type {
   FormattedIncrementalDeferResult,
   FormattedIncrementalStreamResult,
   FormattedIncrementalResult,
-} from './execute.ts';
+} from './IncrementalPublisher.ts';
 export {
   getArgumentValues,
   getVariableValues,
