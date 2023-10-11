@@ -1,6 +1,5 @@
 import { inspect } from '../jsutils/inspect.mjs';
 import { invariant } from '../jsutils/invariant.mjs';
-import { keyMap } from '../jsutils/keyMap.mjs';
 import { Kind } from '../language/kinds.mjs';
 import {
   isInputObjectType,
@@ -92,10 +91,12 @@ export function valueFromAST(valueNode, type, variables) {
       return; // Invalid: intentionally return no value.
     }
     const coercedObj = Object.create(null);
-    const fieldNodes = keyMap(valueNode.fields, (field) => field.name.value);
+    const fieldNodes = new Map(
+      valueNode.fields.map((field) => [field.name.value, field]),
+    );
     for (const field of Object.values(type.getFields())) {
-      const fieldNode = fieldNodes[field.name];
-      if (!fieldNode || isMissingVariable(fieldNode.value, variables)) {
+      const fieldNode = fieldNodes.get(field.name);
+      if (fieldNode == null || isMissingVariable(fieldNode.value, variables)) {
         if (field.defaultValue !== undefined) {
           coercedObj[field.name] = field.defaultValue;
         } else if (isNonNullType(field.type)) {
@@ -108,6 +109,15 @@ export function valueFromAST(valueNode, type, variables) {
         return; // Invalid: intentionally return no value.
       }
       coercedObj[field.name] = fieldValue;
+    }
+    if (type.isOneOf) {
+      const keys = Object.keys(coercedObj);
+      if (keys.length !== 1) {
+        return; // Invalid: not exactly one key, intentionally return no value.
+      }
+      if (coercedObj[keys[0]] === null) {
+        return; // Invalid: value not non-null, intentionally return no value.
+      }
     }
     return coercedObj;
   }

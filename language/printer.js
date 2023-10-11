@@ -122,15 +122,28 @@ const printDocASTReducer = {
   FloatValue: { leave: ({ value }) => value },
   StringValue: {
     leave: ({ value, block: isBlockString }) =>
-      isBlockString
+      isBlockString === true
         ? (0, blockString_js_1.printBlockString)(value)
         : (0, printString_js_1.printString)(value),
   },
   BooleanValue: { leave: ({ value }) => (value ? 'true' : 'false') },
   NullValue: { leave: () => 'null' },
   EnumValue: { leave: ({ value }) => value },
-  ListValue: { leave: ({ values }) => '[' + join(values, ', ') + ']' },
-  ObjectValue: { leave: ({ fields }) => '{ ' + join(fields, ', ') + ' }' },
+  ListValue: {
+    leave: ({ values }) => {
+      const valuesLine = '[' + join(values, ', ') + ']';
+      if (valuesLine.length > MAX_LINE_LENGTH) {
+        return '[\n' + indent(join(values, '\n')) + '\n]';
+      }
+      return valuesLine;
+    },
+  },
+  ObjectValue: {
+    leave: ({ fields }) => {
+      const fieldsLine = '{ ' + join(fields, ', ') + ' }';
+      return fieldsLine.length > MAX_LINE_LENGTH ? block(fields) : fieldsLine;
+    },
+  },
   ObjectField: { leave: ({ name, value }) => name + ': ' + value },
   // Directive
   Directive: {
@@ -316,7 +329,7 @@ function wrap(start, maybeString, end = '') {
     : '';
 }
 function indent(str) {
-  return wrap('  ', str.replace(/\n/g, '\n  '));
+  return wrap('  ', str.replaceAll('\n', '\n  '));
 }
 function hasMultilineItems(maybeArray) {
   // FIXME: https://github.com/graphql/graphql-js/issues/2203

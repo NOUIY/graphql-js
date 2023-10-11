@@ -108,7 +108,7 @@ exports.__Directive = new definition_js_1.GraphQLObjectType({
         },
       },
       resolve(field, { includeDeprecated }) {
-        return includeDeprecated
+        return includeDeprecated === true
           ? field.args
           : field.args.filter((arg) => arg.deprecationReason == null);
       },
@@ -233,7 +233,7 @@ exports.__Type = new definition_js_1.GraphQLObjectType({
         /* c8 ignore next 3 */
         // Not reachable, all possible types have been considered)
         false ||
-          invariant(
+          (0, invariant_js_1.invariant)(
             false,
             `Unexpected type: "${(0, inspect_js_1.inspect)(type)}".`,
           );
@@ -271,7 +271,7 @@ exports.__Type = new definition_js_1.GraphQLObjectType({
           (0, definition_js_1.isInterfaceType)(type)
         ) {
           const fields = Object.values(type.getFields());
-          return includeDeprecated
+          return includeDeprecated === true
             ? fields
             : fields.filter((field) => field.deprecationReason == null);
         }
@@ -313,7 +313,7 @@ exports.__Type = new definition_js_1.GraphQLObjectType({
       resolve(type, { includeDeprecated }) {
         if ((0, definition_js_1.isEnumType)(type)) {
           const values = type.getValues();
-          return includeDeprecated
+          return includeDeprecated === true
             ? values
             : values.filter((field) => field.deprecationReason == null);
         }
@@ -332,7 +332,7 @@ exports.__Type = new definition_js_1.GraphQLObjectType({
       resolve(type, { includeDeprecated }) {
         if ((0, definition_js_1.isInputObjectType)(type)) {
           const values = Object.values(type.getFields());
-          return includeDeprecated
+          return includeDeprecated === true
             ? values
             : values.filter((field) => field.deprecationReason == null);
         }
@@ -341,6 +341,14 @@ exports.__Type = new definition_js_1.GraphQLObjectType({
     ofType: {
       type: exports.__Type,
       resolve: (type) => ('ofType' in type ? type.ofType : undefined),
+    },
+    isOneOf: {
+      type: scalars_js_1.GraphQLBoolean,
+      resolve: (type) => {
+        if ((0, definition_js_1.isInputObjectType)(type)) {
+          return type.isOneOf;
+        }
+      },
     },
   }),
 });
@@ -370,7 +378,7 @@ exports.__Field = new definition_js_1.GraphQLObjectType({
         },
       },
       resolve(field, { includeDeprecated }) {
-        return includeDeprecated
+        return includeDeprecated === true
           ? field.args
           : field.args.filter((arg) => arg.deprecationReason == null);
       },

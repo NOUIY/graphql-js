@@ -3,7 +3,6 @@ Object.defineProperty(exports, '__esModule', { value: true });
 exports.lexicographicSortSchema = void 0;
 const inspect_js_1 = require('../jsutils/inspect.js');
 const invariant_js_1 = require('../jsutils/invariant.js');
-const keyValMap_js_1 = require('../jsutils/keyValMap.js');
 const naturalCompare_js_1 = require('../jsutils/naturalCompare.js');
 const definition_js_1 = require('../type/definition.js');
 const directives_js_1 = require('../type/directives.js');
@@ -16,14 +15,15 @@ const schema_js_1 = require('../type/schema.js');
  */
 function lexicographicSortSchema(schema) {
   const schemaConfig = schema.toConfig();
-  const typeMap = (0, keyValMap_js_1.keyValMap)(
-    sortByName(schemaConfig.types),
-    (type) => type.name,
-    sortNamedType,
+  const typeMap = new Map(
+    sortByName(schemaConfig.types).map((type) => [
+      type.name,
+      sortNamedType(type),
+    ]),
   );
   return new schema_js_1.GraphQLSchema({
     ...schemaConfig,
-    types: Object.values(typeMap),
+    types: Array.from(typeMap.values()),
     directives: sortByName(schemaConfig.directives).map(sortDirective),
     query: replaceMaybeType(schemaConfig.query),
     mutation: replaceMaybeType(schemaConfig.mutation),
@@ -41,7 +41,7 @@ function lexicographicSortSchema(schema) {
     return replaceNamedType(type);
   }
   function replaceNamedType(type) {
-    return typeMap[type.name];
+    return typeMap.get(type.name);
   }
   function replaceMaybeType(maybeType) {
     return maybeType && replaceNamedType(maybeType);
@@ -123,7 +123,10 @@ function lexicographicSortSchema(schema) {
     /* c8 ignore next 3 */
     // Not reachable, all possible types have been considered.
     false ||
-      invariant(false, 'Unexpected type: ' + (0, inspect_js_1.inspect)(type));
+      (0, invariant_js_1.invariant)(
+        false,
+        'Unexpected type: ' + (0, inspect_js_1.inspect)(type),
+      );
   }
 }
 exports.lexicographicSortSchema = lexicographicSortSchema;

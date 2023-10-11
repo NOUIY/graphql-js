@@ -1,8 +1,8 @@
 import { didYouMean } from '../../jsutils/didYouMean.mjs';
 import { inspect } from '../../jsutils/inspect.mjs';
-import { keyMap } from '../../jsutils/keyMap.mjs';
 import { suggestionList } from '../../jsutils/suggestionList.mjs';
 import { GraphQLError } from '../../error/GraphQLError.mjs';
+import { Kind } from '../../language/kinds.mjs';
 import { print } from '../../language/printer.mjs';
 import {
   getNamedType,
@@ -22,7 +22,16 @@ import {
  * See https://spec.graphql.org/draft/#sec-Values-of-Correct-Type
  */
 export function ValuesOfCorrectTypeRule(context) {
+  let variableDefinitions = {};
   return {
+    OperationDefinition: {
+      enter() {
+        variableDefinitions = {};
+      },
+    },
+    VariableDefinition(definition) {
+      variableDefinitions[definition.variable.name.value] = definition;
+    },
     ListValue(node) {
       // Note: TypeInfo will traverse into a list's item type, so look to the
       // parent input type to check if it is a list.
@@ -39,9 +48,11 @@ export function ValuesOfCorrectTypeRule(context) {
         return false; // Don't traverse further.
       }
       // Ensure every required field exists.
-      const fieldNodeMap = keyMap(node.fields, (field) => field.name.value);
+      const fieldNodeMap = new Map(
+        node.fields.map((field) => [field.name.value, field]),
+      );
       for (const fieldDef of Object.values(type.getFields())) {
-        const fieldNode = fieldNodeMap[fieldDef.name];
+        const fieldNode = fieldNodeMap.get(fieldDef.name);
         if (!fieldNode && isRequiredInputField(fieldDef)) {
           const typeStr = inspect(fieldDef.type);
           context.reportError(
@@ -51,6 +62,15 @@ export function ValuesOfCorrectTypeRule(context) {
             ),
           );
         }
+      }
+      if (type.isOneOf) {
+        validateOneOfInputObject(
+          context,
+          node,
+          type,
+          fieldNodeMap,
+          variableDefinitions,
+        );
       }
     },
     ObjectField(node) {
@@ -132,6 +152,49 @@ function isValidValueNode(context, node) {
           `Expected value of type "${typeStr}", found ${print(node)}; ` +
             error.message,
           { nodes: node, originalError: error },
+        ),
+      );
+    }
+  }
+}
+function validateOneOfInputObject(
+  context,
+  node,
+  type,
+  fieldNodeMap,
+  variableDefinitions,
+) {
+  const keys = Array.from(fieldNodeMap.keys());
+  const isNotExactlyOneField = keys.length !== 1;
+  if (isNotExactlyOneField) {
+    context.reportError(
+      new GraphQLError(
+        `OneOf Input Object "${type.name}" must specify exactly one key.`,
+        { nodes: [node] },
+      ),
+    );
+    return;
+  }
+  const value = fieldNodeMap.get(keys[0])?.value;
+  const isNullLiteral = !value || value.kind === Kind.NULL;
+  const isVariable = value?.kind === Kind.VARIABLE;
+  if (isNullLiteral) {
+    context.reportError(
+      new GraphQLError(`Field "${type.name}.${keys[0]}" must be non-null.`, {
+        nodes: [node],
+      }),
+    );
+    return;
+  }
+  if (isVariable) {
+    const variableName = value.name.value;
+    const definition = variableDefinitions[variableName];
+    const isNullableVariable = definition.type.kind !== Kind.NON_NULL_TYPE;
+    if (isNullableVariable) {
+      context.reportError(
+        new GraphQLError(
+          `Variable "${variableName}" must be non-nullable to be used for OneOf Input Object "${type.name}".`,
+          { nodes: [node] },
         ),
       );
     }

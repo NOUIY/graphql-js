@@ -27,8 +27,7 @@
  * @packageDocumentation
  */
 Object.defineProperty(exports, '__esModule', { value: true });
-exports.isObjectType =
-  exports.isScalarType =
+exports.isScalarType =
   exports.isType =
   exports.isDirective =
   exports.isSchema =
@@ -46,6 +45,7 @@ exports.isObjectType =
   exports.introspectionTypes =
   exports.DEFAULT_DEPRECATION_REASON =
   exports.TypeKind =
+  exports.GraphQLOneOfDirective =
   exports.GraphQLSpecifiedByDirective =
   exports.GraphQLDeprecatedDirective =
   exports.GraphQLStreamDirective =
@@ -78,8 +78,7 @@ exports.isObjectType =
   exports.versionInfo =
   exports.version =
     void 0;
-exports.printLocation =
-  exports.getLocation =
+exports.getLocation =
   exports.OperationTypeNode =
   exports.Location =
   exports.Source =
@@ -128,6 +127,7 @@ exports.printLocation =
   exports.isEnumType =
   exports.isUnionType =
   exports.isInterfaceType =
+  exports.isObjectType =
     void 0;
 exports.NoUndefinedVariablesRule =
   exports.NoFragmentCyclesRule =
@@ -143,7 +143,6 @@ exports.NoUndefinedVariablesRule =
   exports.ValidationContext =
   exports.validate =
   exports.createSourceEventStream =
-  exports.experimentalSubscribeIncrementally =
   exports.subscribe =
   exports.getDirectiveValues =
   exports.getVariableValues =
@@ -179,9 +178,9 @@ exports.NoUndefinedVariablesRule =
   exports.TokenKind =
   exports.Lexer =
   exports.printSourceLocation =
+  exports.printLocation =
     void 0;
-exports.stripIgnoredCharacters =
-  exports.separateOperations =
+exports.separateOperations =
   exports.concatAST =
   exports.coerceInputValue =
   exports.visitWithTypeInfo =
@@ -191,6 +190,7 @@ exports.stripIgnoredCharacters =
   exports.valueFromAST =
   exports.typeFromAST =
   exports.printIntrospectionSchema =
+  exports.printDirective =
   exports.printType =
   exports.printSchema =
   exports.lexicographicSortSchema =
@@ -238,6 +238,7 @@ exports.findDangerousChanges =
   exports.doTypesOverlap =
   exports.isTypeSubTypeOf =
   exports.isEqualType =
+  exports.stripIgnoredCharacters =
     void 0;
 // The GraphQL.js version info.
 var version_js_1 = require('./version.js');
@@ -432,6 +433,12 @@ Object.defineProperty(exports, 'GraphQLSpecifiedByDirective', {
   enumerable: true,
   get: function () {
     return index_js_1.GraphQLSpecifiedByDirective;
+  },
+});
+Object.defineProperty(exports, 'GraphQLOneOfDirective', {
+  enumerable: true,
+  get: function () {
+    return index_js_1.GraphQLOneOfDirective;
   },
 });
 // "Enum" of Type Kinds
@@ -1077,12 +1084,6 @@ Object.defineProperty(exports, 'subscribe', {
     return index_js_3.subscribe;
   },
 });
-Object.defineProperty(exports, 'experimentalSubscribeIncrementally', {
-  enumerable: true,
-  get: function () {
-    return index_js_3.experimentalSubscribeIncrementally;
-  },
-});
 Object.defineProperty(exports, 'createSourceEventStream', {
   enumerable: true,
   get: function () {
@@ -1420,6 +1421,13 @@ Object.defineProperty(exports, 'printType', {
   enumerable: true,
   get: function () {
     return index_js_6.printType;
+  },
+});
+// Print a GraphQLDirective to GraphQL Schema language.
+Object.defineProperty(exports, 'printDirective', {
+  enumerable: true,
+  get: function () {
+    return index_js_6.printDirective;
   },
 });
 // Prints the built-in introspection schema in the Schema Language format.

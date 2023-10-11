@@ -56,6 +56,7 @@ export {
   GraphQLStreamDirective,
   GraphQLDeprecatedDirective,
   GraphQLSpecifiedByDirective,
+  GraphQLOneOfDirective,
   TypeKind,
   DEFAULT_DEPRECATION_REASON,
   introspectionTypes,
@@ -294,7 +295,6 @@ export {
   getVariableValues,
   getDirectiveValues,
   subscribe,
-  experimentalSubscribeIncrementally,
   createSourceEventStream,
 } from './execution/index.js';
 export type {
@@ -372,6 +372,7 @@ export {
   lexicographicSortSchema,
   printSchema,
   printType,
+  printDirective,
   printIntrospectionSchema,
   typeFromAST,
   valueFromAST,

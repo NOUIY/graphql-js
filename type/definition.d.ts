@@ -407,7 +407,7 @@ export declare class GraphQLObjectType<TSource = any, TContext = any> {
   toJSON(): string;
 }
 export declare function defineArguments(
-  config: GraphQLFieldConfigArgumentMap,
+  args: GraphQLFieldConfigArgumentMap,
 ): ReadonlyArray<GraphQLArgument>;
 /**
  * @internal
@@ -574,20 +574,20 @@ export interface GraphQLInterfaceTypeExtensions {
  * });
  * ```
  */
-export declare class GraphQLInterfaceType {
+export declare class GraphQLInterfaceType<TSource = any, TContext = any> {
   name: string;
   description: Maybe<string>;
-  resolveType: Maybe<GraphQLTypeResolver<any, any>>;
+  resolveType: Maybe<GraphQLTypeResolver<TSource, TContext>>;
   extensions: Readonly<GraphQLInterfaceTypeExtensions>;
   astNode: Maybe<InterfaceTypeDefinitionNode>;
   extensionASTNodes: ReadonlyArray<InterfaceTypeExtensionNode>;
   private _fields;
   private _interfaces;
-  constructor(config: Readonly<GraphQLInterfaceTypeConfig<any, any>>);
+  constructor(config: Readonly<GraphQLInterfaceTypeConfig<TSource, TContext>>);
   get [Symbol.toStringTag](): string;
-  getFields(): GraphQLFieldMap<any, any>;
+  getFields(): GraphQLFieldMap<TSource, TContext>;
   getInterfaces(): ReadonlyArray<GraphQLInterfaceType>;
-  toConfig(): GraphQLInterfaceTypeNormalizedConfig;
+  toConfig(): GraphQLInterfaceTypeNormalizedConfig<TSource, TContext>;
   toString(): string;
   toJSON(): string;
 }
@@ -606,10 +606,10 @@ export interface GraphQLInterfaceTypeConfig<TSource, TContext> {
   astNode?: Maybe<InterfaceTypeDefinitionNode>;
   extensionASTNodes?: Maybe<ReadonlyArray<InterfaceTypeExtensionNode>>;
 }
-export interface GraphQLInterfaceTypeNormalizedConfig
+export interface GraphQLInterfaceTypeNormalizedConfig<TSource, TContext>
   extends GraphQLInterfaceTypeConfig<any, any> {
   interfaces: ReadonlyArray<GraphQLInterfaceType>;
-  fields: GraphQLFieldConfigMap<any, any>;
+  fields: GraphQLFieldConfigMap<TSource, TContext>;
   extensions: Readonly<GraphQLInterfaceTypeExtensions>;
   extensionASTNodes: ReadonlyArray<InterfaceTypeExtensionNode>;
 }
@@ -821,6 +821,7 @@ export declare class GraphQLInputObjectType {
   extensions: Readonly<GraphQLInputObjectTypeExtensions>;
   astNode: Maybe<InputObjectTypeDefinitionNode>;
   extensionASTNodes: ReadonlyArray<InputObjectTypeExtensionNode>;
+  isOneOf: boolean;
   private _fields;
   constructor(config: Readonly<GraphQLInputObjectTypeConfig>);
   get [Symbol.toStringTag](): string;
@@ -836,6 +837,7 @@ export interface GraphQLInputObjectTypeConfig {
   extensions?: Maybe<Readonly<GraphQLInputObjectTypeExtensions>>;
   astNode?: Maybe<InputObjectTypeDefinitionNode>;
   extensionASTNodes?: Maybe<ReadonlyArray<InputObjectTypeExtensionNode>>;
+  isOneOf?: boolean;
 }
 interface GraphQLInputObjectTypeNormalizedConfig
   extends GraphQLInputObjectTypeConfig {

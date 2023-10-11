@@ -4,6 +4,9 @@ exports.SingleFieldSubscriptionsRule = void 0;
 const GraphQLError_js_1 = require('../../error/GraphQLError.js');
 const kinds_js_1 = require('../../language/kinds.js');
 const collectFields_js_1 = require('../../execution/collectFields.js');
+function toNodes(fieldGroup) {
+  return fieldGroup.fields.map((fieldDetails) => fieldDetails.node);
+}
 /**
  * Subscriptions must only include a non-introspection field.
  *
@@ -28,17 +31,19 @@ function SingleFieldSubscriptionsRule(context) {
               fragments[definition.name.value] = definition;
             }
           }
-          const { fields } = (0, collectFields_js_1.collectFields)(
+          const { groupedFieldSet } = (0, collectFields_js_1.collectFields)(
             schema,
             fragments,
             variableValues,
             subscriptionType,
-            node.selectionSet,
+            node,
           );
-          if (fields.size > 1) {
-            const fieldSelectionLists = [...fields.values()];
-            const extraFieldSelectionLists = fieldSelectionLists.slice(1);
-            const extraFieldSelections = extraFieldSelectionLists.flat();
+          if (groupedFieldSet.size > 1) {
+            const fieldGroups = [...groupedFieldSet.values()];
+            const extraFieldGroups = fieldGroups.slice(1);
+            const extraFieldSelections = extraFieldGroups.flatMap(
+              (fieldGroup) => toNodes(fieldGroup),
+            );
             context.reportError(
               new GraphQLError_js_1.GraphQLError(
                 operationName != null
@@ -48,15 +53,15 @@ function SingleFieldSubscriptionsRule(context) {
               ),
             );
           }
-          for (const fieldNodes of fields.values()) {
-            const fieldName = fieldNodes[0].name.value;
+          for (const fieldGroup of groupedFieldSet.values()) {
+            const fieldName = toNodes(fieldGroup)[0].name.value;
             if (fieldName.startsWith('__')) {
               context.reportError(
                 new GraphQLError_js_1.GraphQLError(
                   operationName != null
                     ? `Subscription "${operationName}" must not select an introspection top level field.`
                     : 'Anonymous Subscription must not select an introspection top level field.',
-                  { nodes: fieldNodes },
+                  { nodes: toNodes(fieldGroup) },
                 ),
               );
             }
