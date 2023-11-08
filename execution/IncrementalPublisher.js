@@ -397,10 +397,13 @@ class IncrementalPublisher {
       this._introduce(subsequentResultRecord);
       return;
     }
-    if (subsequentResultRecord._pending.size === 0) {
-      this._push(subsequentResultRecord);
-    } else {
+    if (subsequentResultRecord._pending.size > 0) {
       this._introduce(subsequentResultRecord);
+    } else if (
+      subsequentResultRecord.deferredGroupedFieldSetRecords.size > 0 ||
+      subsequentResultRecord.children.size > 0
+    ) {
+      this._push(subsequentResultRecord);
     }
   }
   _getChildren(erroringIncrementalDataRecord) {
